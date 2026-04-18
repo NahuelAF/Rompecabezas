@@ -22,7 +22,7 @@
       <div class="petal-ring"></div>
       <span class="eyebrow">para vos</span>
       <h1>Te hice algo<br/><em>especial</em> ❤️</h1>
-      <p class="subtitle">Un rompecabezas hecho con amor,<br/>pieza por pieza.</p>
+      <p class="subtitle">Un rompecabezas hecho con cariño,<br/>pieza por pieza.</p>
       <button id="btn-start" class="btn-primary">Empezar</button>
     </div>
   </section>
@@ -97,7 +97,8 @@
   <section id="screen-final" class="screen">
     <div class="final-content">
       <div class="final-image-wrap">
-        <img id="final-image" src="/assets/img/4.jpg" alt="Nuestra foto" />
+        <!-- src vacío: JS lo setea con la imagen del puzzle que se jugó -->
+        <img id="final-image" src="" alt="Nuestra foto" />
         <div class="final-glow"></div>
       </div>
       <p class="final-quote">
@@ -112,7 +113,8 @@
   ═══════════════════════════════════════ -->
   <div id="overlay-preview" class="overlay" aria-hidden="true">
     <div class="overlay-inner">
-      <img src="/assets/img/collage.jpg" alt="Vista previa" />
+      <!-- src vacío: JS lo setea con STATE.imgSrc al abrir el modal -->
+      <img id="preview-image" src="" alt="Vista previa" />
       <button class="overlay-close" id="btn-close-preview">✕</button>
     </div>
   </div>
@@ -142,7 +144,7 @@
         <button id="btn-confirm-no" class="btn-ghost small">Cancelar</button>
       </div>
     </div>
-  </div>
+  </div>  
 
   <!-- Audio -->
   <audio id="bg-music" loop src="/assets/audio/music.mp3" preload="none"></audio>

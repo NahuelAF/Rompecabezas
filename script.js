@@ -26,7 +26,7 @@
 // Podés agregar o quitar entradas libremente.
 const PUZZLE_IMAGES = [
   '/assets/img/1.jpg',
-  '/assets/img/4.jpg',
+  '/assets/img/2.jpg',
 ];
 
 function pickRandomImage() {
@@ -141,11 +141,17 @@ function showScreen(id) {
 
 /* ────────────────────────────────────────────────────
    4. AUDIO
+   ── Para cambiar el volumen editá los valores aquí ──
+   BG_MUSIC_VOL : música de fondo  (0.0 = mute, 1.0 = máximo)
+   POP_VOL      : sonido al poner una pieza
 ──────────────────────────────────────────────────── */
+const BG_MUSIC_VOL = 0.090;   // ← cambiá este valor (0.0 – 1.0)
+const POP_VOL      = 0.55;   // ← cambiá este valor (0.0 – 1.0)
+
 const bgMusic  = document.getElementById('bg-music');
 const popSound = document.getElementById('pop-sound');
-bgMusic.volume = 0.22;
-popSound.volume = 0.55;
+bgMusic.volume  = BG_MUSIC_VOL;
+popSound.volume = POP_VOL;
 
 function startMusic() {
   if (!STATE.muted && bgMusic.paused) bgMusic.play().catch(() => {});
@@ -801,20 +807,22 @@ function heartRain() {
 ──────────────────────────────────────────────────── */
 function onPuzzleComplete() {
   heartRain();
+  // Actualizar imagen final con la que se jugó
+  document.getElementById('final-image').src = STATE.imgSrc;
   setTimeout(() => showScreen('screen-final'), 900);
 }
 
 const LETTER_TEXT = `Quería hacerte algo especial.
-Algo que requiriera paciencia, atención, y un montón de amor.
+Algo que, como vos, se construye con paciencia, constancia y sentido.
 
-Cada pieza de este rompecabezas es un momento nuestro,
-un recuerdo, una sonrisa, una de esas tardes que no quiero olvidar.
+Cada pieza de este rompecabezas guarda un momento,
+un aprendizaje, una de esas cosas que dejan huella.
 
-Cuando armás el rompecabezas, me imaginé cómo ibas a reaccionar,
-y eso me hizo feliz antes de que empezaras.
+Mientras lo armás, pensé en todo lo que me enseñaste:
+que siempre se puede un poco más, incluso cuando cuesta.
 
-Gracias por ser vos.
-Por existir en mi vida de la manera en que existís.
+Gracias por eso.
+Por lo que sos y por lo que hacés sin darte cuenta.
 
 Te quiero más de lo que sabés.`;
 
@@ -825,7 +833,7 @@ function typeLetter() {
   const iv = setInterval(() => {
     if (i >= LETTER_TEXT.length) { clearInterval(iv); return; }
     container.textContent += LETTER_TEXT[i++];
-  }, 22);
+  }, 44);
 }
 
 /* ────────────────────────────────────────────────────
@@ -834,7 +842,11 @@ function typeLetter() {
 const openOverlay  = id => document.getElementById(id).setAttribute('aria-hidden', 'false');
 const closeOverlay = id => document.getElementById(id).setAttribute('aria-hidden', 'true');
 
-document.getElementById('btn-preview').addEventListener('click', () => openOverlay('overlay-preview'));
+document.getElementById('btn-preview').addEventListener('click', () => {
+  // Mostrar la imagen del puzzle actual en el preview
+  document.getElementById('preview-image').src = STATE.imgSrc;
+  openOverlay('overlay-preview');
+});
 document.getElementById('btn-close-preview').addEventListener('click', () => closeOverlay('overlay-preview'));
 document.getElementById('overlay-preview').addEventListener('click', function (e) {
   if (e.target === this) closeOverlay('overlay-preview');
