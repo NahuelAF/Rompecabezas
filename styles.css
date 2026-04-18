@@ -1,0 +1,715 @@
+/* ══════════════════════════════════════════════════════
+   VARIABLES & RESET
+══════════════════════════════════════════════════════ */
+:root {
+  --rose-deep:    #c0394b;
+  --rose-mid:     #e05a6e;
+  --rose-light:   #f5a3b0;
+  --rose-pale:    #fce8ec;
+  --cream:        #fdf6f0;
+  --cream-dark:   #f5ebe3;
+  --text-dark:    #2a1a1f;
+  --text-mid:     #7a4f5a;
+  --text-light:   #b8909a;
+  --glow-color:   rgba(224, 90, 110, 0.55);
+  --shadow-soft:  0 8px 40px rgba(192, 57, 75, 0.18);
+  --shadow-card:  0 4px 24px rgba(192, 57, 75, 0.12);
+  --radius-lg:    20px;
+  --radius-md:    12px;
+  --radius-sm:    8px;
+  --transition:   0.35s cubic-bezier(0.4, 0, 0.2, 1);
+  --font-display: 'Cormorant Garamond', Georgia, serif;
+  --font-body:    'Jost', sans-serif;
+}
+
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html, body {
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  background: var(--cream);
+  color: var(--text-dark);
+  font-family: var(--font-body);
+  -webkit-tap-highlight-color: transparent;
+  touch-action: none;
+}
+
+/* ══════════════════════════════════════════════════════
+   CANVAS CORAZONES (fondo global)
+══════════════════════════════════════════════════════ */
+#heartsCanvas {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 0;
+}
+
+/* ══════════════════════════════════════════════════════
+   SCREENS — Fix para el "ghost" de pantallas anteriores
+   CRÍTICO: visibility:hidden en pantallas inactivas para
+   que no sean visibles ni capturen eventos.
+══════════════════════════════════════════════════════ */
+.screen {
+  position: fixed;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  z-index: 10;
+  /* Estado inicial: invisible y bloqueada */
+  opacity: 0;
+  pointer-events: none;
+  visibility: hidden;
+  transition:
+    opacity    0.55s ease,
+    transform  0.55s cubic-bezier(0.4, 0, 0.2, 1),
+    visibility 0s    linear 0.55s;  /* visibility espera hasta que acabe la transición */
+  transform: translateY(18px);
+  /* Aislamiento: evita que el contenido "traspase" visualmente */
+  isolation: isolate;
+  will-change: opacity, transform;
+}
+
+.screen.active {
+  opacity: 1;
+  pointer-events: all;
+  visibility: visible;
+  transform: translateY(0);
+  transition:
+    opacity    0.55s ease,
+    transform  0.55s cubic-bezier(0.4, 0, 0.2, 1),
+    visibility 0s    linear 0s; /* visible de inmediato */
+}
+
+.screen.exit {
+  opacity: 0;
+  transform: translateY(-18px);
+  pointer-events: none;
+  visibility: hidden;
+  transition:
+    opacity    0.55s ease,
+    transform  0.55s cubic-bezier(0.4, 0, 0.2, 1),
+    visibility 0s    linear 0.55s;
+}
+
+/* ══════════════════════════════════════════════════════
+   PANTALLA INTRO
+══════════════════════════════════════════════════════ */
+.intro-content {
+  text-align: center;
+  padding: 40px 24px;
+  position: relative;
+}
+
+.petal-ring {
+  position: absolute;
+  width: 320px;
+  height: 320px;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  border-radius: 50%;
+  border: 1px solid rgba(192, 57, 75, 0.12);
+  pointer-events: none;
+  animation: ringPulse 4s ease-in-out infinite;
+}
+.petal-ring::before,
+.petal-ring::after {
+  content: '';
+  position: absolute;
+  inset: -30px;
+  border-radius: 50%;
+  border: 1px solid rgba(192, 57, 75, 0.07);
+}
+.petal-ring::after {
+  inset: -60px;
+}
+
+@keyframes ringPulse {
+  0%, 100% { transform: translate(-50%, -50%) scale(1);    opacity: 0.6; }
+  50%       { transform: translate(-50%, -50%) scale(1.04); opacity: 1;   }
+}
+
+.eyebrow {
+  display: block;
+  font-family: var(--font-body);
+  font-weight: 300;
+  font-size: 0.72rem;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: var(--rose-mid);
+  margin-bottom: 16px;
+}
+
+h1 {
+  font-family: var(--font-display);
+  font-size: clamp(2.8rem, 8vw, 4.5rem);
+  font-weight: 300;
+  line-height: 1.12;
+  color: var(--text-dark);
+  margin-bottom: 16px;
+}
+h1 em {
+  font-style: italic;
+  color: var(--rose-deep);
+}
+
+h2 {
+  font-family: var(--font-display);
+  font-size: clamp(2rem, 6vw, 3rem);
+  font-weight: 300;
+  line-height: 1.2;
+  color: var(--text-dark);
+  margin-bottom: 36px;
+}
+
+.subtitle {
+  font-size: 0.9rem;
+  color: var(--text-light);
+  line-height: 1.7;
+  margin-bottom: 40px;
+  font-weight: 300;
+}
+
+/* ══════════════════════════════════════════════════════
+   BOTONES
+══════════════════════════════════════════════════════ */
+.btn-primary {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background: linear-gradient(135deg, var(--rose-deep), var(--rose-mid));
+  color: #fff;
+  border: none;
+  padding: 15px 38px;
+  border-radius: 100px;
+  font-family: var(--font-body);
+  font-size: 0.92rem;
+  font-weight: 400;
+  letter-spacing: 0.06em;
+  cursor: pointer;
+  box-shadow: 0 6px 30px rgba(192, 57, 75, 0.35);
+  transition: var(--transition);
+  position: relative;
+  overflow: hidden;
+}
+.btn-primary::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.15), transparent);
+  opacity: 0;
+  transition: opacity 0.2s;
+}
+.btn-primary:hover   { transform: translateY(-2px); box-shadow: 0 10px 36px rgba(192, 57, 75, 0.42); }
+.btn-primary:hover::after { opacity: 1; }
+.btn-primary:active  { transform: translateY(0); }
+.btn-primary.small   { padding: 11px 26px; font-size: 0.85rem; }
+
+.btn-ghost {
+  background: transparent;
+  border: 1px solid rgba(192, 57, 75, 0.35);
+  color: var(--rose-deep);
+  padding: 11px 26px;
+  border-radius: 100px;
+  font-family: var(--font-body);
+  font-size: 0.85rem;
+  cursor: pointer;
+  transition: var(--transition);
+}
+.btn-ghost:hover { background: var(--rose-pale); }
+
+/* ══════════════════════════════════════════════════════
+   PANTALLA DIFICULTAD
+══════════════════════════════════════════════════════ */
+.difficulty-content {
+  text-align: center;
+  padding: 40px 24px;
+  width: 100%;
+  max-width: 560px;
+}
+
+.difficulty-cards {
+  display: flex;
+  gap: 14px;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+
+.diff-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  border-color: var(--rose-mid);
+  background: linear-gradient(160deg, #fff 60%, var(--rose-pale));
+  border-radius: var(--radius-lg);
+  padding: 24px 20px 20px;
+  width: 140px;
+  cursor: pointer;
+  transition: var(--transition);
+  position: relative;
+  box-shadow: var(--shadow-card);
+  font-family: var(--font-body);
+}
+.diff-card:hover {
+  border-color: var(--rose-mid);
+  transform: translateY(-4px);
+  box-shadow: var(--shadow-soft);
+}
+.diff-badge {
+  position: absolute;
+  top: -10px;
+  background: var(--rose-deep);
+  color: #fff;
+  font-size: 0.65rem;
+  padding: 3px 10px;
+  border-radius: 100px;
+  letter-spacing: 0.05em;
+}
+.diff-icon  { font-size: 2rem; line-height: 1; }
+.diff-label { font-size: 0.95rem; font-weight: 400; color: var(--text-dark); }
+.diff-sub   { font-size: 0.72rem; color: var(--text-light); font-weight: 300; }
+
+/* ══════════════════════════════════════════════════════
+   PANTALLA JUEGO
+══════════════════════════════════════════════════════ */
+#screen-game {
+  flex-direction: column;
+  justify-content: flex-start;
+  padding: 0;
+  overflow: hidden;
+}
+
+.game-header {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 14px 20px;
+  background: rgba(253, 246, 240, 0.92);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border-bottom: 1px solid rgba(192, 57, 75, 0.1);
+  z-index: 20;
+  flex-shrink: 0;
+}
+
+.game-info {
+  display: flex;
+  align-items: baseline;
+  gap: 6px;
+}
+#pieces-counter {
+  font-family: var(--font-display);
+  font-size: 1.4rem;
+  font-weight: 400;
+  color: var(--rose-deep);
+}
+.info-label {
+  font-size: 0.72rem;
+  letter-spacing: 0.1em;
+  color: var(--text-light);
+  text-transform: uppercase;
+}
+
+.game-controls {
+  display: flex;
+  gap: 8px;
+}
+
+.ctrl-btn {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  border: 1px solid rgba(192, 57, 75, 0.2);
+  background: #fff;
+  color: var(--rose-deep);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: var(--transition);
+  box-shadow: 0 2px 8px rgba(192, 57, 75, 0.08);
+}
+.ctrl-btn svg    { width: 18px; height: 18px; }
+.ctrl-btn:hover  { background: var(--rose-pale); border-color: var(--rose-mid); }
+
+/* Cuerpo del juego */
+.game-body {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 100%;
+  overflow-y: auto;
+  overflow-x: hidden;
+  padding: 16px 12px;
+  gap: 16px;
+  -webkit-overflow-scrolling: touch;
+}
+
+/* Tablero */
+.board-wrapper {
+  position: relative;
+  flex-shrink: 0;
+}
+
+#puzzle-board {
+  display: grid;
+  background: transparent;
+  border: none;
+  border-radius: var(--radius-md);
+  overflow: visible;
+  box-shadow: none;
+  position: relative;
+}
+
+/* Slot del tablero — la guía visual es el canvas .slot-guide
+   que se dibuja con forma de puzzle. El div es solo contenedor. */
+.board-slot {
+  position: relative;
+  /* Sin border: el canvas guía ya tiene el contorno punteado con forma puzzle */
+  border: none;
+  /* Overflow visible para que el canvas de la pieza (con tabs) no se corte */
+  overflow: visible;
+  transition: background 0.2s;
+  z-index: 1;
+  background: transparent;
+}
+
+.board-slot.drag-over {
+  background: rgba(224, 90, 110, 0.12);
+}
+
+.board-slot.filled {
+  /* Slot ocupado: sin borde, el canvas de la pieza es lo visible */
+  border: none;
+  background: transparent !important;
+  overflow: visible;
+}
+
+/* Pieza colocada: flash de confirmación */
+@keyframes correctFlash {
+  0%   { filter: brightness(1)    drop-shadow(0 0 0px   rgba(224, 90, 110, 0));    }
+  35%  { filter: brightness(1.2)  drop-shadow(0 0 18px  rgba(224, 90, 110, 0.95)); }
+  100% { filter: brightness(1)    drop-shadow(0 0 6px   rgba(224, 90, 110, 0.35)); }
+}
+
+/* Bandeja de piezas */
+.pieces-tray {
+  width: 100%;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  justify-content: center;
+  align-items: flex-start;
+  padding: 14px;
+  background: rgba(255, 255, 255, 0.55);
+  border: 1.5px solid rgba(192, 57, 75, 0.12);
+  border-radius: var(--radius-lg);
+  min-height: 90px;
+  box-shadow: inset 0 2px 12px rgba(192, 57, 75, 0.04);
+  /* Overflow visible para tabs de piezas en los bordes */
+  overflow: visible;
+}
+
+.tray-hint {
+  font-size: 0.75rem;
+  color: var(--text-light);
+  width: 100%;
+  text-align: center;
+  font-weight: 300;
+  letter-spacing: 0.04em;
+  pointer-events: none;
+}
+
+/* Wrapper de pieza en bandeja */
+.tray-piece-wrap {
+  cursor: grab;
+  /* CRÍTICO: overflow visible para que los tabs no se corten */
+  overflow: visible;
+  transition: transform 0.18s, filter 0.18s;
+  flex-shrink: 0;
+  position: relative;
+  /* Elevar sobre elementos vecinos para que los tabs no queden detrás */
+  z-index: 2;
+}
+.tray-piece-wrap:hover {
+  transform: translateY(-4px) scale(1.06);
+  filter: drop-shadow(0 8px 18px rgba(192, 57, 75, 0.32));
+  z-index: 10;
+}
+.tray-piece-wrap:active {
+  cursor: grabbing;
+}
+
+/* ══════════════════════════════════════════════════════
+   PANTALLA FINAL
+══════════════════════════════════════════════════════ */
+#screen-final {
+  padding: 20px;
+  overflow-y: auto;
+}
+.final-content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 24px;
+  text-align: center;
+  padding: 20px 0;
+}
+.final-image-wrap {
+  position: relative;
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+  box-shadow: var(--shadow-soft);
+  max-width: min(340px, 80vw);
+  animation: finalZoom 0.8s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+}
+@keyframes finalZoom {
+  from { transform: scale(0.88); opacity: 0; }
+  to   { transform: scale(1);    opacity: 1; }
+}
+.final-image-wrap img {
+  width: 100%;
+  display: block;
+  object-fit: cover;
+}
+.final-glow {
+  position: absolute;
+  inset: 0;
+  box-shadow: inset 0 0 40px rgba(224, 90, 110, 0.4);
+  animation: glowPulse 2.5s ease-in-out infinite;
+  pointer-events: none;
+}
+@keyframes glowPulse {
+  0%, 100% { box-shadow: inset 0 0 30px rgba(224, 90, 110, 0.3); }
+  50%       { box-shadow: inset 0 0 60px rgba(224, 90, 110, 0.55); }
+}
+.final-quote {
+  font-family: var(--font-display);
+  font-size: clamp(1.3rem, 4vw, 1.9rem);
+  font-style: italic;
+  color: var(--text-dark);
+  line-height: 1.5;
+}
+
+/* ══════════════════════════════════════════════════════
+   OVERLAYS (modales)
+══════════════════════════════════════════════════════ */
+.overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 200;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(30, 10, 15, 0.72);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  opacity: 0;
+  pointer-events: none;
+  visibility: hidden;
+  transition:
+    opacity    0.35s ease,
+    visibility 0s    linear 0.35s;
+}
+.overlay[aria-hidden="false"] {
+  opacity: 1;
+  pointer-events: all;
+  visibility: visible;
+  transition:
+    opacity    0.35s ease,
+    visibility 0s    linear 0s;
+}
+
+.overlay-inner {
+  position: relative;
+  background: var(--cream);
+  border-radius: var(--radius-lg);
+  padding: 28px;
+  max-width: min(480px, 90vw);
+  width: 100%;
+  box-shadow: 0 20px 60px rgba(192, 57, 75, 0.25);
+  transform: scale(0.94);
+  transition: transform 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+  max-height: 90vh;
+  overflow-y: auto;
+}
+.overlay[aria-hidden="false"] .overlay-inner {
+  transform: scale(1);
+}
+
+.overlay-inner img {
+  width: 100%;
+  border-radius: var(--radius-md);
+  display: block;
+  object-fit: contain;
+  max-height: 70vh;
+}
+
+.overlay-close {
+  position: absolute;
+  top: 14px;
+  right: 14px;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  border: 1px solid rgba(192, 57, 75, 0.2);
+  background: #fff;
+  color: var(--rose-deep);
+  font-size: 0.85rem;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: var(--transition);
+  line-height: 1;
+}
+.overlay-close:hover { background: var(--rose-pale); }
+
+/* Carta */
+.letter-inner {
+  max-width: min(560px, 92vw);
+}
+.letter-wrap {
+  margin-top: 8px;
+}
+.letter-eyebrow {
+  display: block;
+  font-size: 0.68rem;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--rose-mid);
+  margin-bottom: 20px;
+}
+.letter-text {
+  font-family: var(--font-display);
+  font-size: 1.05rem;
+  line-height: 1.9;
+  color: var(--text-dark);
+  font-style: italic;
+  min-height: 60px;
+  white-space: pre-wrap;
+}
+.letter-signature {
+  margin-top: 28px;
+  font-family: var(--font-display);
+  font-size: 1.1rem;
+  color: var(--rose-deep);
+  text-align: right;
+}
+
+/* Confirmación */
+.confirm-inner {
+  max-width: 300px;
+  text-align: center;
+  padding: 32px 24px;
+}
+.confirm-inner p {
+  font-family: var(--font-display);
+  font-size: 1.15rem;
+  margin-bottom: 24px;
+  color: var(--text-dark);
+}
+.confirm-btns {
+  display: flex;
+  gap: 12px;
+  justify-content: center;
+}
+
+/* ══════════════════════════════════════════════════════
+   PARTÍCULAS CORAZONES (DOM-based)
+══════════════════════════════════════════════════════ */
+.heart-particle {
+  position: fixed;
+  font-size: 1rem;
+  pointer-events: none;
+  z-index: 500;
+  animation: floatParticle 1.1s ease-out forwards;
+  will-change: transform, opacity;
+}
+@keyframes floatParticle {
+  0%   { transform: translate(0, 0) scale(1);   opacity: 1; }
+  100% { transform: translate(var(--tx), var(--ty)) scale(0.3); opacity: 0; }
+}
+
+/* ══════════════════════════════════════════════════════
+   RESPONSIVE: DESKTOP
+══════════════════════════════════════════════════════ */
+@media (min-width: 680px) {
+  .game-body {
+    flex-direction: row;
+    align-items: flex-start;
+    justify-content: center;
+    padding: 24px 20px;
+    gap: 24px;
+  }
+
+  .board-wrapper {
+    flex-shrink: 0;
+  }
+
+  .pieces-tray {
+    max-width: 230px;
+    max-height: calc(100vh - 120px);
+    overflow-y: auto;
+    overflow-x: visible;
+    align-content: flex-start;
+    flex-shrink: 0;
+    flex-wrap: wrap;
+  }
+  .tray-hint { display: none; }
+}
+
+/* ══════════════════════════════════════════════════════
+   RESPONSIVE: MOBILE (iPhone 14 Pro y similares)
+══════════════════════════════════════════════════════ */
+@media (max-width: 679px) {
+  /* Espacio extra para notch / dynamic island */
+  #screen-game {
+    padding-top: env(safe-area-inset-top);
+    padding-bottom: env(safe-area-inset-bottom);
+  }
+
+  .game-header {
+    padding: 10px 16px;
+    padding-top: calc(10px + env(safe-area-inset-top));
+  }
+
+  .game-body {
+    padding: 12px 10px;
+    gap: 12px;
+  }
+
+  /* Bandeja más compacta en mobile */
+  .pieces-tray {
+    gap: 8px;
+    padding: 10px;
+    min-height: 72px;
+  }
+
+  /* Botones de control más grandes en mobile (touch targets) */
+  .ctrl-btn {
+    width: 44px;
+    height: 44px;
+  }
+}
+
+/* ══════════════════════════════════════════════════════
+   UTILIDADES
+══════════════════════════════════════════════════════ */
+.visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+}

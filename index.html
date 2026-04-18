@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <title>Para Vos ❤️</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;1,300;1,400&family=Jost:wght@300;400&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+
+  <!-- Canvas para corazones flotantes (siempre visible) -->
+  <canvas id="heartsCanvas"></canvas>
+
+  <!-- ═══════════════════════════════════════
+       PANTALLA 1: INICIO
+  ═══════════════════════════════════════ -->
+  <section id="screen-intro" class="screen active">
+    <div class="intro-content">
+      <div class="petal-ring"></div>
+      <span class="eyebrow">para vos</span>
+      <h1>Te hice algo<br/><em>especial</em> ❤️</h1>
+      <p class="subtitle">Un rompecabezas hecho con amor,<br/>pieza por pieza.</p>
+      <button id="btn-start" class="btn-primary">Empezar</button>
+    </div>
+  </section>
+
+  <!-- ═══════════════════════════════════════
+       PANTALLA 2: DIFICULTAD
+  ═══════════════════════════════════════ -->
+  <section id="screen-difficulty" class="screen">
+    <div class="difficulty-content">
+      <span class="eyebrow">elegí tu desafío</span>
+      <h2>¿Qué tan difícil<br/>lo querés?</h2>
+      <div class="difficulty-cards">
+        <button class="diff-card" data-grid="3">
+          <span class="diff-icon">🌸</span>
+          <span class="diff-label">Fácil</span>
+          <span class="diff-sub">3×3 · 9 piezas</span>
+        </button>
+        <button class="diff-card featured" data-grid="4">
+          <span class="diff-icon">🌹</span>
+          <span class="diff-label">Medio</span>
+          <span class="diff-sub">4×4 · 16 piezas</span>
+        </button>
+        <button class="diff-card" data-grid="6">
+          <span class="diff-icon">💎</span>
+          <span class="diff-label">Difícil</span>
+          <span class="diff-sub">6×6 · 36 piezas</span>
+        </button>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══════════════════════════════════════
+       PANTALLA 3: JUEGO
+  ═══════════════════════════════════════ -->
+  <section id="screen-game" class="screen">
+    <!-- Barra superior -->
+    <header class="game-header">
+      <div class="game-info">
+        <span id="pieces-counter">0 / 0</span>
+        <span class="info-label">piezas</span>
+      </div>
+      <div class="game-controls">
+        <button id="btn-preview" class="ctrl-btn" title="Ver imagen">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+        </button>
+        <button id="btn-restart" class="ctrl-btn" title="Reiniciar">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/></svg>
+        </button>
+        <button id="btn-mute" class="ctrl-btn" title="Música">
+          <svg id="icon-sound-on" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><path d="M19.07 4.93a10 10 0 0 1 0 14.14"/><path d="M15.54 8.46a5 5 0 0 1 0 7.07"/></svg>
+          <svg id="icon-sound-off" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" style="display:none"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><line x1="23" y1="9" x2="17" y2="15"/><line x1="17" y1="9" x2="23" y2="15"/></svg>
+        </button>
+      </div>
+    </header>
+
+    <!-- Área principal del juego -->
+    <div class="game-body">
+      <!-- Tablero (posiciones correctas) -->
+      <div class="board-wrapper">
+        <div id="puzzle-board"></div>
+      </div>
+      <!-- Piezas sueltas -->
+      <div id="pieces-tray" class="pieces-tray">
+        <p class="tray-hint">Arrastrá las piezas al tablero</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══════════════════════════════════════
+       PANTALLA 4: FINAL
+  ═══════════════════════════════════════ -->
+  <section id="screen-final" class="screen">
+    <div class="final-content">
+      <div class="final-image-wrap">
+        <img id="final-image" src="/assets/img/4.jpg" alt="Nuestra foto" />
+        <div class="final-glow"></div>
+      </div>
+      <p class="final-quote">
+        Cada pieza tiene un pedacito<br/>de lo que siento por vos ❤️
+      </p>
+      <button id="btn-letter" class="btn-primary">Leer mi mensaje 💌</button>
+    </div>
+  </section>
+
+  <!-- ═══════════════════════════════════════
+       MODAL: PREVIEW DE IMAGEN
+  ═══════════════════════════════════════ -->
+  <div id="overlay-preview" class="overlay" aria-hidden="true">
+    <div class="overlay-inner">
+      <img src="/assets/img/collage.jpg" alt="Vista previa" />
+      <button class="overlay-close" id="btn-close-preview">✕</button>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════
+       MODAL: CARTA
+  ═══════════════════════════════════════ -->
+  <div id="overlay-letter" class="overlay" aria-hidden="true">
+    <div class="overlay-inner letter-inner">
+      <button class="overlay-close" id="btn-close-letter">✕</button>
+      <div class="letter-wrap">
+        <span class="letter-eyebrow">para vos, con todo mi corazón</span>
+        <div id="letter-text" class="letter-text"></div>
+        <div class="letter-signature">Con amor ❤️</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════
+       MODAL: CONFIRMACIÓN REINICIO
+  ═══════════════════════════════════════ -->
+  <div id="overlay-confirm" class="overlay" aria-hidden="true">
+    <div class="overlay-inner confirm-inner">
+      <p>¿Seguro que querés reiniciar?</p>
+      <div class="confirm-btns">
+        <button id="btn-confirm-yes" class="btn-primary small">Sí, reiniciar</button>
+        <button id="btn-confirm-no" class="btn-ghost small">Cancelar</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Audio -->
+  <audio id="bg-music" loop src="/assets/audio/music.mp3" preload="none"></audio>
+  <audio id="pop-sound" src="/assets/audio/pop.mp3" preload="auto"></audio>
+
+  <script src="script.js"></script>
+</body>
+</html>
