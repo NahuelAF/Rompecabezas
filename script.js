@@ -25,8 +25,8 @@
 // Nombrá tus fotos 1.jpg, 2.jpg, 3.jpg, 4.jpg en /assets/img/
 // Podés agregar o quitar entradas libremente.
 const PUZZLE_IMAGES = [
-  '/assets/img/1.jpg',
-  '/assets/img/2.jpg',
+  '/assets/img/collage.jpg',
+  '/assets/img/collage2.jpg',
 ];
 
 function pickRandomImage() {
